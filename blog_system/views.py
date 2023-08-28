@@ -3,7 +3,6 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-
 #### 
 from .models import Post
 from .serializers import PostSerializer
@@ -26,8 +25,8 @@ from .serializers import PostSerializer
 def get_posts(request):
     posts = Post.objects.all()
     serializer = PostSerializer(posts, many=True)
-    print(serializer.data)
     return Response(serializer.data)
+
 
 @api_view(['POST'])
 def create_post(request):
