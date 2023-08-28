@@ -118,7 +118,10 @@ class CourseOverview(TimeStampedModel):
     enrollment_domain = models.TextField(null=True)
     invitation_only = models.BooleanField(default=False)
     max_student_enrollments_allowed = models.IntegerField(null=True)
-
+    
+    # Djezzy Acadmey
+    is_by_approval = models.BooleanField(default=False)
+    
     # Catalog information
     catalog_visibility = models.TextField(null=True)
     short_description = models.TextField(null=True)

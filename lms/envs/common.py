@@ -3253,6 +3253,9 @@ INSTALLED_APPS = [
 
     # MFE API
     'lms.djangoapps.mfe_config_api',
+    
+    # Blog_system 
+    'blog_system.apps.BlogSystemConfig',
 ]
 
 ######################### CSRF #########################################
