@@ -3257,6 +3257,9 @@ INSTALLED_APPS = [
     # Djezzy Academy
     # Blog_system 
     'blog_system.apps.BlogSystemConfig',
+    
+    # Gamification 
+    'gamification.apps.GamificationConfig'
 ]
 
 ######################### CSRF #########################################
