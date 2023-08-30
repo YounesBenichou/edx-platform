@@ -1,5 +1,16 @@
 from django.contrib import admin
-from . import models 
+
+# Register your models here.
+from . import models
+
 # Register your models here.
 admin.site.register(models.Gamification)
 admin.site.register(models.UserGamification)
+
+
+# badge register
+@admin.register(models.Badge)
+class BadgeAdmin(admin.ModelAdmin):
+    list_display = ("name", "rule", "created", "modified")
+    search_fields = ("name",)
+    list_filter = ("created", "modified")
