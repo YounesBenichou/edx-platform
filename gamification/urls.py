@@ -4,7 +4,6 @@ from django.urls import path, re_path
 from . import views
 
 
-
 urlpatterns = [
     path('v1/gamification_parameters/', views.get_gamification_parameters, name='get-gamification_parameters'),
     path('v1/gamification_parameters/modify/', views.modify_gamification_parameters , name='modify-gamification_parameters'),
