@@ -5,6 +5,10 @@ from . import views
 
 
 urlpatterns = [
+    # gamification parameters
     path('v1/gamification_parameters/', views.get_gamification_parameters, name='get-gamification_parameters'),
     path('v1/gamification_parameters/modify/', views.modify_gamification_parameters , name='modify-gamification_parameters'),
+
+    # Score
+    # path('v1/socre_user/<int:user_id>/', views.get_score_user, name='get-score_user'),
 ]

@@ -8,7 +8,7 @@ from .serializers import UserGamificationSerializerGet, UserGamificationSerializ
 
 # Create your views here.
 # get, create, modify, delete
-
+# Gamification parameters 
 @api_view(['GET'])
 def get_gamification_parameters(request):
     gamification_parameters = Gamification.objects.all()
@@ -31,5 +31,37 @@ def modify_gamification_parameters(request):
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+# UserGamification score
+@api_view(['GET'])
+def get_score_user(request, user_id):
+    # print("user id",user_id )
+    score = UserGamification.objects.get(user_id=4)
+    print(score)
+    # emp.objects.filter(id=id_employee).first()
+    # score = UserGamification.objects.filter(user_id=user_id).first()
+    try:
+        score = UserGamification.objects.get(user_id=4)
+    except UserGamification.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    # serializer = UserGamification(score, many=False)
+    # print(serializer.data[0])
+    # return Response(serializer.data[0])
+    return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+# @api_view(['PUT'])
+# def modify_gamification_parameters(request):
+#     try:
+#         gamification_parameters = Gamification.objects.first()
+#     except Gamification.DoesNotExist:
+#         return Response(status=status.HTTP_404_NOT_FOUND)
+
+#     if request.method == 'PUT':
+#         serializer = GamificationSerializerPut(gamification_parameters, data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data, status=status.HTTP_200_OK)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

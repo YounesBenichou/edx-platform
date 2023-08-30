@@ -21,5 +21,4 @@ class UserGamification(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     score = models.IntegerField(default=0, null=True, blank=True ) # blankTrue means it is nor required
     last_time_played_spinningwheel = models.DateTimeField(null=True, blank=True)
-    def __str__(self):
-        return "store the scores of users"
+    
