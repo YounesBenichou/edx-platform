@@ -1,6 +1,6 @@
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framwork.decorators import api_view
+from rest_framework.decorators import api_view
 
 from .models import Gamification, UserGamification
 from .serializers import GamificationSerializerGet, GamificationSerializerPut
@@ -12,8 +12,9 @@ from .serializers import UserGamificationSerializerGet, UserGamificationSerializ
 @api_view(['GET'])
 def get_gamification_parameters(request):
     gamification_parameters = Gamification.objects.all()
+    print(gamification_parameters)
     serializer = GamificationSerializerGet(gamification_parameters, many=True)
-    return Response(serializer.data)
+    return Response(serializer.data[0])
 
 
 @api_view(['PUT'])
