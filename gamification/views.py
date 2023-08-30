@@ -19,7 +19,7 @@ def get_gamification_parameters(request):
 @api_view(['PUT'])
 def modify_gamification_parameters(request):
     try:
-        gamification_parameters = Gamification.objects.get[0]
+        gamification_parameters = Gamification.objects.first()
     except Gamification.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -29,3 +29,6 @@ def modify_gamification_parameters(request):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+

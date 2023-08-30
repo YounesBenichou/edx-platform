@@ -1038,3 +1038,8 @@ urlpatterns += [
     path('api/posts/', include('blog_system.urls')),
 ]
 
+
+# URL Blog system
+urlpatterns += [
+    path('api/gamification/', include('gamification.urls')),
+]
