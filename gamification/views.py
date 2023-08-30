@@ -3,10 +3,10 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 
 from .models import Gamification, UserGamification
-# from .models import Badge
+from .models import Badge
 from .serializers import GamificationSerializerGet, GamificationSerializerPut
 from .serializers import UserGamificationSerializerGet, UserGamificationSerializerPut
-# from .serializers import BadgeSerializer
+from .serializers import BadgeSerializer
 
 
 # Create your views here.
@@ -70,27 +70,26 @@ def get_score_user(request, user_id):
 #             return Response(serializer.data, status=status.HTTP_200_OK)
 #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-# @api_view(["GET"])
-# def get_badge(request, badge_id):
-#     badge = Badge.objects.get(id=badge_id)
-#     print("badge", badge)
-#     serializer = BadgeSerializer(badge)
-#     return Response(serializer.data)
+@api_view(["GET"])
+def get_badge(request, badge_id):
+    badge = Badge.objects.get(id=badge_id)
+    serializer = BadgeSerializer(badge)
+    return Response(serializer.data)
 
 
-# @api_view(["GET"])
-# def get_all_badges(request):
-#     badges = Badge.objects.all()
-#     serializer = BadgeSerializer(badges, many=True)
-#     return Response(serializer.data)
+@api_view(["GET"])
+def get_all_badges(request):
+    badges = Badge.objects.all()
+    serializer = BadgeSerializer(badges, many=True)
+    return Response(serializer.data)
 
 
-# @api_view(["PUT"])
-# def modify_badge(request, badge_id):
-#     badge = Badge.objects.get(id=badge_id)
-#     serializer = BadgeSerializer(badge, data=request.data)
+@api_view(["PUT"])
+def modify_badge(request, badge_id):
+    badge = Badge.objects.get(id=badge_id)
+    serializer = BadgeSerializer(badge, data=request.data)
 
-#     if serializer.is_valid():
-#         serializer.save()
-#         return Response({"message": "Badge updated successfully."})
-#     return Response(serializer.errors, status=400)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({"message": "Badge updated successfully."})
+    return Response(serializer.errors, status=400)
