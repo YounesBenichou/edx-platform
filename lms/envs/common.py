@@ -3254,6 +3254,7 @@ INSTALLED_APPS = [
     # MFE API
     'lms.djangoapps.mfe_config_api',
     
+    # Djezzy Academy
     # Blog_system 
     'blog_system.apps.BlogSystemConfig',
 ]

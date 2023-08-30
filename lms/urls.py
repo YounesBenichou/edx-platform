@@ -1032,6 +1032,8 @@ urlpatterns += [
 ]
 
 
+# Djezzy Academy
+# URL Blog system
 urlpatterns += [
     path('api/posts/', include('blog_system.urls')),
 ]
