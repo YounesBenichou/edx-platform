@@ -7,10 +7,11 @@ from . import models
 admin.site.register(models.Gamification)
 admin.site.register(models.UserGamification)
 admin.site.register(models.Badge)
+admin.site.register(models.UserBadge)
+
 
 
 # # badge register
 # admin.register(models.Badge)
 # class BadgeAdmin(admin.ModelAdmin):
 #     list_display = ("name", "rule", "created", "modified")
-

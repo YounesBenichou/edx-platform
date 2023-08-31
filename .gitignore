@@ -147,6 +147,8 @@ dist
 # Locally generated PII reports
 pii_report
 
+
+
 # Ignore Django migration files
-**/migrations/*.py
+*/migrations/.py
 **/migrations/__pycache__/

@@ -39,7 +39,7 @@ def modify_gamification_parameters(request):
 
 
 # UserGamification score
-@api_view(['GET'])
+@api_view(["GET"])
 def get_score_user(request, user_id):
     # print("user id",user_id )
     score = UserGamification.objects.get(user_id=4)
@@ -56,19 +56,22 @@ def get_score_user(request, user_id):
     return Response(status=status.HTTP_404_NOT_FOUND)
 
 
-# @api_view(['PUT'])
-# def modify_gamification_parameters(request):
-#     try:
-#         gamification_parameters = Gamification.objects.first()
-#     except Gamification.DoesNotExist:
-#         return Response(status=status.HTTP_404_NOT_FOUND)
+@api_view(["PUT"])
+def modify_gamification_parameters(request):
+    try:
+        gamification_parameters = Gamification.objects.first()
+    except Gamification.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
-#     if request.method == 'PUT':
-#         serializer = GamificationSerializerPut(gamification_parameters, data=request.data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data, status=status.HTTP_200_OK)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    if request.method == "PUT":
+        serializer = GamificationSerializerPut(
+            gamification_parameters, data=request.data
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(["GET"])
 def get_badge(request, badge_id):

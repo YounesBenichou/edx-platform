@@ -33,6 +33,7 @@ class UserGamification(models.Model):
     )  # blankTrue means it is nor required
     last_time_played_spinningwheel = models.DateTimeField(null=True, blank=True)
 
+
 # Badge Model
 
 
@@ -43,5 +44,12 @@ class Badge(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 
-    # def __str__(self):
-    #     return self.name
+    def __str__(self):
+        return self.name
+
+
+class UserBadge(models.Model):
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    badge_id = models.ForeignKey(Badge, on_delete=models.CASCADE)
+    created = models.DateTimeField(auto_now_add=True)
+
