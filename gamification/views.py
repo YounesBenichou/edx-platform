@@ -3,11 +3,11 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 
 from .models import Gamification, UserGamification
-from .models import Badge
+from .models import Badge, UserBadge
 from .serializers import GamificationSerializerGet, GamificationSerializerPut
 from .serializers import UserGamificationSerializerGet, UserGamificationSerializerPut
-from .serializers import BadgeSerializer
-
+from .serializers import BadgeSerializer, UserBadgeSerializer
+from django.shortcuts import get_object_or_404
 
 # Create your views here.
 # get, create, modify, delete
@@ -123,3 +123,29 @@ def delete_badge(request, badge_id):
 
     badge.delete()
     return Response({"message": "Badge deleted successfully."})
+
+
+# Userbadge
+@api_view(["GET"])
+def get_user_badges(request, user_id):
+    user_badges = UserBadge.objects.filter(user_id=user_id)
+    serializer = UserBadgeSerializer(user_badges, many=True)
+    return Response(serializer.data)
+
+
+@api_view(["POST"])
+def create_user_badge(request):
+    serializer = UserBadgeSerializer(data=request.data)
+
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=201)
+
+    return Response(serializer.errors, status=400)
+
+
+@api_view(["DELETE"])
+def delete_user_badge(request, user_badge_id):
+    user_badge = get_object_or_404(UserBadge, pk=user_badge_id)
+    user_badge.delete()
+    return Response({"message": "User badge deleted successfully."})
