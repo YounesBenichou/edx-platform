@@ -16,7 +16,6 @@ from .serializers import BadgeSerializer
 @api_view(["GET"])
 def get_gamification_parameters(request):
     gamification_parameters = Gamification.objects.all()
-    print(gamification_parameters)
     serializer = GamificationSerializerGet(gamification_parameters, many=True)
     return Response(serializer.data[0])
 
@@ -40,37 +39,39 @@ def modify_gamification_parameters(request):
 
 # UserGamification score
 @api_view(["GET"])
+def get_score_all(request):
+    score_users = UserGamification.objects.all()
+    serializer = UserGamificationSerializerGet(score_users, many=True)
+    return Response(serializer.data)
+
+@api_view(["GET"])
 def get_score_user(request, user_id):
-    # print("user id",user_id )
-    score = UserGamification.objects.get(user_id=4)
-    print(score)
-    # emp.objects.filter(id=id_employee).first()
-    # score = UserGamification.objects.filter(user_id=user_id).first()
     try:
-        score = UserGamification.objects.get(user_id=4)
+        score = UserGamification.objects.get(user_id=user_id)
     except UserGamification.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
-    # serializer = UserGamification(score, many=False)
-    # print(serializer.data[0])
-    # return Response(serializer.data[0])
-    return Response(status=status.HTTP_404_NOT_FOUND)
-
+    serializer = UserGamificationSerializerGet(score, many=False)
+    print(serializer.data)
+    return Response(serializer.data)
 
 @api_view(["PUT"])
-def modify_gamification_parameters(request):
-    try:
-        gamification_parameters = Gamification.objects.first()
-    except Gamification.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-
-    if request.method == "PUT":
-        serializer = GamificationSerializerPut(
-            gamification_parameters, data=request.data
-        )
+def modify_score_user(request, user_id):
+    try: 
+        score_user = UserGamification.objects.get(user_id=user_id)
+    except UserGamification.DoesNotExist:
+        # create an object of UserGamification with the points recieved
+        score_user_object = {
+            "score" : request.data["points"],
+            "user_id": user_id,
+        }
+        serializer = UserGamificationSerializerPut(data=score_user_object)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+    score_user.score = score_user.score + int(request.data["points"])
+    score_user.save()
+    return Response(status=status.HTTP_200_OK)
+
 
 
 @api_view(["GET"])
