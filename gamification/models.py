@@ -33,9 +33,6 @@ class UserGamification(models.Model):
     )  # blankTrue means it is nor required
     last_time_played_spinningwheel = models.DateTimeField(null=True, blank=True)
 
-    def __str__(self):
-        return "store the scores of users"
-
 
 # Badge Model
 
