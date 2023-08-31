@@ -1771,6 +1771,12 @@ INSTALLED_APPS = [
 
     # Blockstore
     'blockstore.apps.bundles',
+    
+    # Djezzy Academy
+    # Blog_system
+    "blog_system.apps.BlogSystemConfig",
+    # Gamification
+    "gamification.apps.GamificationConfig",
 ]
 
 
