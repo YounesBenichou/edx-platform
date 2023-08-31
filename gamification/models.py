@@ -46,3 +46,10 @@ class Badge(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class UserBadge(models.Model):
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    badge_id = models.ForeignKey(Badge, on_delete=models.CASCADE)
+    created = models.DateTimeField(auto_now_add=True)
+

@@ -7,6 +7,8 @@ from . import models
 admin.site.register(models.Gamification)
 admin.site.register(models.UserGamification)
 admin.site.register(models.Badge)
+admin.site.register(models.UserBadge)
+
 
 
 # # badge register
