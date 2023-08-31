@@ -12,7 +12,7 @@ from web_fragments.fragment import Fragment
 from openedx.core.djangolib.markup import HTML
 
 
-@XBlock.wants('completion')
+@XBlock.wants("completion")
 class LmsBlockMixin(XBlockMixin):
     """
     A mixin that provides functionality and default attributes for all XBlocks
@@ -28,22 +28,25 @@ class LmsBlockMixin(XBlockMixin):
     has_score = False
 
     @XBlock.json_handler
-    def publish_completion(self, data, suffix=''):  # pylint: disable=unused-argument
+    def publish_completion(self, data, suffix=""):  # pylint: disable=unused-argument
         """
         Allow the frontend app that's rendering this XBlock to mark it as
         completed when the user views it, if appropriate.
 
         Copied from lms.djangoapps.lms_xblock.mixin.LmsBlockMixin
         """
-        completion_service = self.runtime.service(self, 'completion')
+        completion_service = self.runtime.service(self, "completion")
         if completion_service is None:  # lint-amnesty, pylint: disable=no-else-raise
             raise JsonHandlerError(500, "No completion service found")
         elif not completion_service.completion_tracking_enabled():
-            raise JsonHandlerError(404, "Completion tracking is not enabled and API calls are unexpected")
+            raise JsonHandlerError(
+                404, "Completion tracking is not enabled and API calls are unexpected"
+            )
         if not completion_service.can_mark_block_complete_on_view(self):
             raise JsonHandlerError(400, "Block not configured for completion on view.")
         self.runtime.publish(self, "completion", data)
-        return {'result': 'ok'}
+
+        return {"result": "ok"}
 
     def public_view(self, _context):
         """
@@ -62,10 +65,12 @@ class LmsBlockMixin(XBlockMixin):
         # (Note: 'self.runtime.user' is not part of the XBlock API and some runtimes don't provide it, but this mixin is
         # part of the runtime so it's OK to access it that way.)
         if self.runtime.user is None or self.runtime.user.is_anonymous:
-            display_text = _('This content is only accessible to registered learners. Sign in or register to view it.')
+            display_text = _(
+                "This content is only accessible to registered learners. Sign in or register to view it."
+            )
         else:
             # This is a registered user but they're still seeing public_view
             # so they must be excluded because of enrollment status.
-            display_text = _('This content is only accessible to enrolled learners. ')
+            display_text = _("This content is only accessible to enrolled learners. ")
 
         return Fragment(alert_html.format(display_text))

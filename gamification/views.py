@@ -44,6 +44,7 @@ def get_score_all(request):
     serializer = UserGamificationSerializerGet(score_users, many=True)
     return Response(serializer.data)
 
+
 @api_view(["GET"])
 def get_score_user(request, user_id):
     try:
@@ -54,14 +55,15 @@ def get_score_user(request, user_id):
     print(serializer.data)
     return Response(serializer.data)
 
+
 @api_view(["PUT"])
 def modify_score_user(request, user_id):
-    try: 
+    try:
         score_user = UserGamification.objects.get(user_id=user_id)
     except UserGamification.DoesNotExist:
         # create an object of UserGamification with the points recieved
         score_user_object = {
-            "score" : request.data["points"],
+            "score": request.data["points"],
             "user_id": user_id,
         }
         serializer = UserGamificationSerializerPut(data=score_user_object)
@@ -71,7 +73,6 @@ def modify_score_user(request, user_id):
     score_user.score = score_user.score + int(request.data["points"])
     score_user.save()
     return Response(status=status.HTTP_200_OK)
-
 
 
 @api_view(["GET"])
@@ -150,3 +151,28 @@ def delete_user_badge(request, user_badge_id):
     user_badge = get_object_or_404(UserBadge, pk=user_badge_id)
     user_badge.delete()
     return Response({"message": "User badge deleted successfully."})
+
+
+@api_view(["POST"])
+def update_score(request, user_id, type):
+    if type == "unit":
+        try:
+            user_gamification = UserGamification.objects.get(user_id=user_id)
+            gamification = Gamification.objects.get(id=1)
+            print("gamification", gamification)
+
+            total_score = gamification.learning_unit_completed + user_gamification.score
+            user_gamification.score = total_score
+            user_gamification.save()
+
+            return Response(
+                {"message": "Score updated successfully."}
+            )  # Return the response
+        except UserGamification.DoesNotExist:
+            return Response(
+                {"message": "UserGamification not found for user"}, status=404
+            )
+        except Gamification.DoesNotExist:
+            return Response({"message": "Gamification not found"}, status=404)
+    else:
+        return Response({"message": "Type 'unit' not found"}, status=400)

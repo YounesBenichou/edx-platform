@@ -26,4 +26,10 @@ urlpatterns = [
     # Badge
     path("v1/badges/", views.get_all_badges, name="get_all_badges"),
     path("v1/badge/modify/<int:badge_id>/", views.modify_badge, name="modify_badge"),
+    # updatescore
+    path(
+        "v1/update_score/<int:user_id>/<str:type>/",
+        views.update_score,
+        name="update_score",
+    ),
 ]
