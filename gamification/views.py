@@ -87,12 +87,39 @@ def get_all_badges(request):
     return Response(serializer.data)
 
 
+@api_view(["POST"])
+def create_badge(request):
+    serializer = BadgeSerializer(data=request.data)
+
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=201)
+
+    return Response(serializer.errors, status=400)
+
+
 @api_view(["PUT"])
 def modify_badge(request, badge_id):
-    badge = Badge.objects.get(id=badge_id)
+    try:
+        badge = Badge.objects.get(id=badge_id)
+    except Badge.DoesNotExist:
+        return Response({"message": "Badge not found."}, status=404)
+
     serializer = BadgeSerializer(badge, data=request.data)
 
     if serializer.is_valid():
         serializer.save()
         return Response({"message": "Badge updated successfully."})
+
     return Response(serializer.errors, status=400)
+
+
+@api_view(["DELETE"])
+def delete_badge(request, badge_id):
+    try:
+        badge = Badge.objects.get(id=badge_id)
+    except Badge.DoesNotExist:
+        return Response({"message": "Badge not found."}, status=404)
+
+    badge.delete()
+    return Response({"message": "Badge deleted successfully."})
