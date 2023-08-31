@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
 from .models import Gamification, UserGamification
-
 from .models import Badge
 
 

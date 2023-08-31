@@ -3,7 +3,6 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 
 from .models import Gamification, UserGamification
-
 from .models import Badge
 from .serializers import GamificationSerializerGet, GamificationSerializerPut
 from .serializers import UserGamificationSerializerGet, UserGamificationSerializerPut
@@ -77,21 +76,19 @@ def modify_gamification_parameters(request):
 @api_view(["GET"])
 def get_badge(request, badge_id):
     badge = Badge.objects.get(id=badge_id)
-    print("badge", badge)
     serializer = BadgeSerializer(badge)
     return Response(serializer.data)
 
 
-# @api_view(["GET"])
-# def get_all_badges(request):
-#     badges = Badge.objects.all()
-#     serializer = BadgeSerializer(badges, many=True)
-#     return Response(serializer.data)
+@api_view(["GET"])
+def get_all_badges(request):
+    badges = Badge.objects.all()
+    serializer = BadgeSerializer(badges, many=True)
+    return Response(serializer.data)
 
 
 @api_view(["PUT"])
 def modify_badge(request, badge_id):
-    print("put badge")
     badge = Badge.objects.get(id=badge_id)
     serializer = BadgeSerializer(badge, data=request.data)
 

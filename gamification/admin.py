@@ -9,9 +9,7 @@ admin.site.register(models.UserGamification)
 admin.site.register(models.Badge)
 
 
-# badge register
+# # badge register
 # admin.register(models.Badge)
 # class BadgeAdmin(admin.ModelAdmin):
 #     list_display = ("name", "rule", "created", "modified")
-#     search_fields = ("name",)
-#     list_filter = ("created", "modified")
