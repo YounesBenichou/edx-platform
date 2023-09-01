@@ -2,14 +2,15 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 
+from .models import User
 from .models import Gamification, UserGamification
 from .models import Badge, UserBadge
-from .models import Award
+from .models import Award, UserAward
 from .models import UserGamification
 from .serializers import GamificationSerializerGet, GamificationSerializerPut
 from .serializers import UserGamificationSerializerGet, UserGamificationSerializerPut
 from .serializers import BadgeSerializer, UserBadgeSerializer
-from .serializers import AwardSerializer
+from .serializers import AwardSerializer, UserAwardSerializer
 from django.shortcuts import get_object_or_404
 
 # Create your views here.
@@ -285,3 +286,70 @@ def award_detail(request, pk):
     elif request.method == "DELETE":
         award.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# UserAward views
+
+
+@api_view(["GET"])
+def user_award_list(request):
+    user_awards = UserAward.objects.all()
+    serializer = UserAwardSerializer(user_awards, many=True)
+    return Response(serializer.data)
+
+
+@api_view(["POST"])
+def user_award_create(request):
+    serializer = UserAwardSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(["PUT"])
+def user_award_update(request, pk):
+    try:
+        user_award = UserAward.objects.get(pk=pk)
+    except UserAward.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    serializer = UserAwardSerializer(user_award, data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# handling awards
+
+
+@api_view(["POST"])
+def handle_award(request, user_id, award_id):
+    # Get the user and award objects
+    user = get_object_or_404(User, pk=user_id)
+    award = get_object_or_404(Award, pk=award_id)
+
+    # Check if the user's score is sufficient for the award rule
+    user_gamification = get_object_or_404(UserGamification, user_id=user_id)
+    if user_gamification.score >= award.rule:
+        # Deduct points from the user's score based on the award rule
+        user_gamification.score -= award.rule
+        user_gamification.save()
+
+        # Create a UserAward record for the user
+        user_award = UserAward.objects.create(user_id=user, award_id=award)
+
+        # Return a success response
+        return Response(
+            {
+                "message": f"Award '{award.name}' has been granted to user '{user.username}'."
+            },
+            status=status.HTTP_201_CREATED,
+        )
+    else:
+        # Return a response indicating insufficient score
+        return Response(
+            {"message": "Insufficient score to receive this award."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )

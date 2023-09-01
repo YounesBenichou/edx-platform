@@ -42,4 +42,18 @@ urlpatterns = [
     # Award
     path("v1/awards/", views.award_list, name="award-list"),
     path("v1/awards/<int:pk>/", views.award_detail, name="award-detail"),
+    # UserAwards
+    path("v1/user_awards/", views.user_award_list, name="user_award_list"),
+    path("v1/user_awards/create/", views.user_award_create, name="user_award_create"),
+    path(
+        "v1/user_awards/update/<int:pk>/",
+        views.user_award_update,
+        name="user_award_update",
+    ),
+    # handleaward
+    path(
+        "v1/handle_award/<int:user_id>/<int:award_id>/",
+        views.handle_award,
+        name="handle_award",
+    ),
 ]

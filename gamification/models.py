@@ -83,4 +83,4 @@ class UserAward(models.Model):
     delivery_date = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
-        return self.name
+        return str(self.user_id) + ":" + str(self.award_id)
