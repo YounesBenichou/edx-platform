@@ -34,7 +34,7 @@ class UserGamification(models.Model):
     last_time_played_spinningwheel = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
-        return "Gamification parameters"
+        return str(self.user_id) + ":" + str(self.score)
 
 
 # Badge Model
@@ -68,6 +68,19 @@ class Award(models.Model):
     rule = models.PositiveIntegerField()
     image = models.ImageField(upload_to="award_images/", null=True, blank=True)
     description = models.TextField()
+
+    def __str__(self):
+        return self.name
+
+
+# UserAward
+
+
+class UserAward(models.Model):
+    created = models.DateTimeField(auto_now_add=True)
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    award_id = models.ForeignKey(Award, on_delete=models.CASCADE)
+    delivery_date = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return self.name

@@ -5,6 +5,7 @@ from rest_framework.decorators import api_view
 from .models import Gamification, UserGamification
 from .models import Badge, UserBadge
 from .models import Award
+from .models import UserGamification
 from .serializers import GamificationSerializerGet, GamificationSerializerPut
 from .serializers import UserGamificationSerializerGet, UserGamificationSerializerPut
 from .serializers import BadgeSerializer, UserBadgeSerializer
@@ -58,23 +59,69 @@ def get_score_user(request, user_id):
     return Response(serializer.data)
 
 
-@api_view(["PUT"])
-def modify_score_user(request, user_id):
+# this is a function called by update score api_view to handle userGamification to be created when non-existant
+def modify_score_user(user_id, new_score):
+    try:
+        user = UserGamification.objects.get(user_id=user_id)
+        current_score = user.score
+        badges = Badge.objects.all()
+
+        # checking if user has any badges
+        for badge in badges:
+            if new_score >= badge.rule and current_score < badge.rule:
+                UserBadge.objects.create(user_id=user.user_id, badge_id=badge)
+
+        # checking if user should lose badges
+        for badge in badges:
+            if new_score < badge.rule and current_score >= badge.rule:
+                UserBadge.objects.filter(user_id=user.user_id, badge_id=badge).delete()
+    except UserGamification.DoesNotExist:
+        return Response({"message": "UserGamification not found"}, status=404)
+
+    # simpler code  here for userGamification modification/creation  without serializers
+    # try:
+    # score_user = UserGamification.objects.get(user_id=user_id)
+    # score_user.score = new_score
+    # score_user.save()
+    # except UserGamification.DoesNotExist:
+    # # create an object of UserGamification with the points received
+    # UserGamification.objects.create(user_id=user_id, score=new_score)
     try:
         score_user = UserGamification.objects.get(user_id=user_id)
+
     except UserGamification.DoesNotExist:
         # create an object of UserGamification with the points recieved
-        score_user_object = {
-            "score": request.data["points"],
+        score_user = {
+            "score": new_score,
             "user_id": user_id,
         }
-        serializer = UserGamificationSerializerPut(data=score_user_object)
+        serializer = UserGamificationSerializerPut(data=score_user)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-    score_user.score = score_user.score + int(request.data["points"])
+    print("score_user", score_user)
+
+    score_user.score = new_score
     score_user.save()
-    return Response(status=status.HTTP_200_OK)
+
+    serializer = UserGamificationSerializerPut(data=score_user)
+    if serializer.is_valid():
+        serializer.save()
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+# api view that handles modification score for api calls it is different from modifi_user_score
+
+
+@api_view(["PUT"])
+def modify_score(request, user_id, new_score):
+    modify_score_user(user_id, new_score)
+    # if api_response.status_code == 200:
+    #     response_data = api_response.data
+    #     return Response(f"API Response: {response_data['message']}")
+    # else:
+    #     # Handle errors or other responses
+    return Response("user score and badge modified")
 
 
 @api_view(["GET"])
@@ -144,6 +191,19 @@ def create_user_badge(request):
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data, status=201)
+    return Response(serializer.errors, status=400)
+
+
+def create_user_badge(user_id, badge_id):
+    user_badge = {
+        "user_id": user_id,
+        "badge_id": badge_id,
+    }
+    serializer = UserBadgeSerializer(data=user_badge)
+
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=201)
 
     return Response(serializer.errors, status=400)
 
@@ -163,29 +223,25 @@ def update_score(request, user_id, type):
             user_gamification.score
         )  # if no condition met in if elif statements, score is made to old score
         gamification = Gamification.objects.get(id=1)
-        print("gamification", gamification)
 
         if type == "unit":
-            total_score = gamification.learning_unit_completed + user_gamification.score
+            new_score = gamification.learning_unit_completed + total_score
+            print(new_score)
+
         elif type == "section":
-            total_score = (
-                gamification.learning_section_completed + user_gamification.score
-            )
+            new_score = gamification.learning_section_completed + total_score
         elif type == "course":
-            total_score = gamification.course_completed + user_gamification.score
+            new_score = gamification.course_completed + total_score
         elif type == "program":
-            total_score = gamification.program_completed + user_gamification.score
+            new_score = gamification.program_completed + total_score
 
-        user_gamification.score = total_score
-        user_gamification.save()
-
-        # We have to call a function that handles badges here
+        modify_score_user(user_id, new_score)  # this function also handles badges
 
         return Response(
             {"message": "Score updated successfully."}
         )  # Return the response
     except UserGamification.DoesNotExist:
-        return Response({"message": "UserGamification not found for user"}, status=404)
+        return Response({"message": "UserGamification not found for user "}, status=404)
     except Gamification.DoesNotExist:
         return Response({"message": "Gamification not found"}, status=404)
 
