@@ -8,7 +8,7 @@ admin.site.register(models.Gamification)
 admin.site.register(models.UserGamification)
 admin.site.register(models.Badge)
 admin.site.register(models.UserBadge)
-
+admin.site.register(models.Award)
 
 
 # # badge register

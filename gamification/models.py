@@ -33,6 +33,9 @@ class UserGamification(models.Model):
     )  # blankTrue means it is nor required
     last_time_played_spinningwheel = models.DateTimeField(null=True, blank=True)
 
+    def __str__(self):
+        return "Gamification parameters"
+
 
 # Badge Model
 
@@ -55,3 +58,16 @@ class UserBadge(models.Model):
 
     def __str__(self):
         return str(self.user_id) + ":" + str(self.badge_id)
+
+
+# Award
+class Award(models.Model):
+    name = models.CharField(max_length=255)
+    created = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
+    rule = models.PositiveIntegerField()
+    image = models.ImageField(upload_to="award_images/", null=True, blank=True)
+    description = models.TextField()
+
+    def __str__(self):
+        return self.name

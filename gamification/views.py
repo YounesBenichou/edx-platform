@@ -4,9 +4,11 @@ from rest_framework.decorators import api_view
 
 from .models import Gamification, UserGamification
 from .models import Badge, UserBadge
+from .models import Award
 from .serializers import GamificationSerializerGet, GamificationSerializerPut
 from .serializers import UserGamificationSerializerGet, UserGamificationSerializerPut
 from .serializers import BadgeSerializer, UserBadgeSerializer
+from .serializers import AwardSerializer
 from django.shortcuts import get_object_or_404
 
 # Create your views here.
@@ -155,24 +157,75 @@ def delete_user_badge(request, user_badge_id):
 
 @api_view(["POST"])
 def update_score(request, user_id, type):
-    if type == "unit":
-        try:
-            user_gamification = UserGamification.objects.get(user_id=user_id)
-            gamification = Gamification.objects.get(id=1)
-            print("gamification", gamification)
+    try:
+        user_gamification = UserGamification.objects.get(user_id=user_id)
+        total_score = (
+            user_gamification.score
+        )  # if no condition met in if elif statements, score is made to old score
+        gamification = Gamification.objects.get(id=1)
+        print("gamification", gamification)
 
+        if type == "unit":
             total_score = gamification.learning_unit_completed + user_gamification.score
-            user_gamification.score = total_score
-            user_gamification.save()
-
-            return Response(
-                {"message": "Score updated successfully."}
-            )  # Return the response
-        except UserGamification.DoesNotExist:
-            return Response(
-                {"message": "UserGamification not found for user"}, status=404
+        elif type == "section":
+            total_score = (
+                gamification.learning_section_completed + user_gamification.score
             )
-        except Gamification.DoesNotExist:
-            return Response({"message": "Gamification not found"}, status=404)
-    else:
-        return Response({"message": "Type 'unit' not found"}, status=400)
+        elif type == "course":
+            total_score = gamification.course_completed + user_gamification.score
+        elif type == "program":
+            total_score = gamification.program_completed + user_gamification.score
+
+        user_gamification.score = total_score
+        user_gamification.save()
+
+        # We have to call a function that handles badges here
+
+        return Response(
+            {"message": "Score updated successfully."}
+        )  # Return the response
+    except UserGamification.DoesNotExist:
+        return Response({"message": "UserGamification not found for user"}, status=404)
+    except Gamification.DoesNotExist:
+        return Response({"message": "Gamification not found"}, status=404)
+
+    return Response({"message": "Type 'unit' not found"}, status=400)
+
+
+# Awards
+@api_view(["GET", "POST"])
+def award_list(request):
+    if request.method == "GET":
+        awards = Award.objects.all()
+        serializer = AwardSerializer(awards, many=True)
+        return Response(serializer.data)
+
+    elif request.method == "POST":
+        serializer = AwardSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(["GET", "PUT", "DELETE"])
+def award_detail(request, pk):
+    try:
+        award = Award.objects.get(pk=pk)
+    except Award.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == "GET":
+        serializer = AwardSerializer(award)
+        return Response(serializer.data)
+
+    elif request.method == "PUT":
+        serializer = AwardSerializer(award, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    elif request.method == "DELETE":
+        award.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

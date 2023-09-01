@@ -32,4 +32,7 @@ urlpatterns = [
         views.update_score,
         name="update_score",
     ),
+    # Award
+    path("v1/awards/", views.award_list, name="award-list"),
+    path("v1/awards/<int:pk>/", views.award_detail, name="award-detail"),
 ]
