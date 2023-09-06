@@ -7,7 +7,14 @@ from .models import Gamification, UserGamification
 from .models import Badge, UserBadge
 from .models import Award, UserAward
 from .models import UserGamification
-from .serializers import GamificationSerializerGet, GamificationSerializerPut
+from .serializers import (
+    GamificationSerializerGet,
+    GamificationSerializerPut,
+    LeaderboardSerializer,
+    UserGamificationLastTimePlayedSerializer,
+    UserGamificationSerializer,
+    UserSerializer,
+)
 from .serializers import UserGamificationSerializerGet, UserGamificationSerializerPut
 from .serializers import BadgeSerializer, UserBadgeSerializer
 from .serializers import AwardSerializer, UserAwardSerializer
@@ -15,6 +22,31 @@ from django.shortcuts import get_object_or_404
 
 # Create your views here.
 # get, create, modify, delete
+
+
+# Users for usernames
+@api_view(["GET"])
+def user_list(request):
+    """
+    List all users.
+    """
+    users = User.objects.all()
+    serializer = UserSerializer(users, many=True)
+    return Response(serializer.data)
+
+
+@api_view(["GET"])
+def user_detail(request, pk):
+    """
+    Retrieve a single user by primary key (id).
+    """
+    try:
+        user = User.objects.get(pk=pk)
+    except User.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    serializer = UserSerializer(user)
+    return Response(serializer.data)
 
 
 @api_view(["GET"])
@@ -125,6 +157,7 @@ def modify_score(request, user_id, new_score):
     return Response("user score and badge modified")
 
 
+# Get avalaible badges
 @api_view(["GET"])
 def get_badge(request, badge_id):
     badge = Badge.objects.get(id=badge_id)
@@ -177,12 +210,30 @@ def delete_badge(request, badge_id):
     return Response({"message": "Badge deleted successfully."})
 
 
-# Userbadge
+# Userbadges
 @api_view(["GET"])
 def get_user_badges(request, user_id):
     user_badges = UserBadge.objects.filter(user_id=user_id)
     serializer = UserBadgeSerializer(user_badges, many=True)
     return Response(serializer.data)
+
+
+def get_user_badges_leaderboard(user_id):
+    user_badges = UserBadge.objects.filter(user_id=user_id)
+    badge_data = []
+
+    for badge in user_badges:
+        badge_data.append(
+            {
+                "badge_id": badge.badge_id.id,
+                "name": badge.badge_id.name,
+                "badge_image": badge.badge_id.badge_image,
+                "rule": badge.badge_id.rule,
+                # Add other badge fields as needed
+            }
+        )
+
+    return badge_data
 
 
 @api_view(["POST"])
@@ -216,6 +267,7 @@ def delete_user_badge(request, user_badge_id):
     return Response({"message": "User badge deleted successfully."})
 
 
+# Score
 @api_view(["POST"])
 def update_score(request, user_id, type):
     try:
@@ -298,6 +350,14 @@ def user_award_list(request):
     return Response(serializer.data)
 
 
+@api_view(["GET"])
+def get_user_award(request, user_id):
+    user_awards = UserAward.objects.filter(user_id=user_id).values_list(
+        "award_id", flat=True
+    )
+    return Response(list(user_awards))
+
+
 @api_view(["POST"])
 def user_award_create(request):
     serializer = UserAwardSerializer(data=request.data)
@@ -353,3 +413,106 @@ def handle_award(request, user_id, award_id):
             {"message": "Insufficient score to receive this award."},
             status=status.HTTP_400_BAD_REQUEST,
         )
+
+
+# spinning wheel
+@api_view(["GET"])
+def get_last_time_played_spinningwheel(request, user_id):
+    try:
+        user_gamification = UserGamification.objects.get(user_id=user_id)
+    except UserGamification.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    serializer = UserGamificationLastTimePlayedSerializer(user_gamification)
+    return Response(serializer.data)
+
+
+@api_view(["PUT"])
+def update_last_time_played_spinningwheel(request, user_id):
+    try:
+        user_gamification = UserGamification.objects.get(user_id=user_id)
+    except UserGamification.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    serializer = UserGamificationLastTimePlayedSerializer(
+        user_gamification, data=request.data
+    )
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# Leaderboard
+
+
+@api_view(["GET"])
+def get_leaderboard(request):
+    users = UserGamification.objects.all()
+    leaderboard_data = []
+
+    for user in users:
+        print("--------------------printing user", user)
+        user_id = user.user_id.id
+        badges = get_user_badges_leaderboard(user_id)
+        user_data = {
+            "user_id": user.user_id.id,
+            "username": user.user_id.username,  # Fetch the username from the User model
+            "score": user.score,
+            "badges": badges,
+        }
+        leaderboard_data.append(user_data)
+
+    leaderboard_data = sorted(leaderboard_data, key=lambda x: x["score"], reverse=True)
+    serializer = LeaderboardSerializer(leaderboard_data, many=True)
+    return Response(serializer.data)
+
+
+# userpage
+
+
+@api_view(["GET"])
+def get_user_page_data(request, user_id):
+    try:
+        # Get user's gamification data
+        score = UserGamification.objects.get(user_id=user_id)
+        serializer_score = UserGamificationSerializerGet(score, many=False).data
+    except UserGamification.DoesNotExist:
+        serializer_score = None
+
+    # Get user's badges with their names
+    user_badges = UserBadge.objects.filter(user_id=user_id)
+    badge_ids = user_badges.values_list("badge_id", flat=True)  # Get the badge IDs
+
+    # Get the Badge objects with names
+    badges = Badge.objects.filter(id__in=badge_ids).values("name")
+
+    # Convert badges queryset to a list of dictionaries
+    badge_names_list = [{"name": badge["name"]} for badge in badges]
+
+    try:
+        # Get user's last time played spinning wheel
+        user_gamification = UserGamification.objects.get(user_id=user_id)
+        serializer_last_time_played = UserGamificationLastTimePlayedSerializer(
+            user_gamification
+        ).data
+    except UserGamification.DoesNotExist:
+        serializer_last_time_played = None
+
+    # Get user's awards with their id and name
+    user_awards = UserAward.objects.filter(user_id=user_id)
+    award_ids = user_awards.values_list("award_id", flat=True)  # Get the award IDs
+
+    # Get the Award objects with id and name
+    awards = Award.objects.filter(id__in=award_ids).values("id", "name")
+
+    user_awards_list = list(awards)
+
+    user_data = {
+        "user_score": serializer_score,
+        "user_badges": badge_names_list,  # Use the badge names list
+        "last_time_played_spinningwheel": serializer_last_time_played,
+        "user_awards": user_awards_list,
+    }
+
+    return Response(user_data)
