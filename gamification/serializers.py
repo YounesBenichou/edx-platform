@@ -1,7 +1,8 @@
 from rest_framework import serializers
 
 from .models import Gamification, UserGamification
-from .models import Badge
+from .models import Badge, UserBadge
+from .models import Award, UserAward
 
 
 class GamificationSerializerGet(serializers.ModelSerializer):
@@ -31,4 +32,22 @@ class UserGamificationSerializerPut(serializers.ModelSerializer):
 class BadgeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Badge
+        fields = "__all__"
+
+
+class UserBadgeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserBadge
+        fields = "__all__"
+
+
+class AwardSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Award
+        fields = "__all__"
+
+
+class UserAwardSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserAward
         fields = "__all__"
