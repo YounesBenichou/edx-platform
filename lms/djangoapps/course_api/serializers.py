@@ -9,8 +9,9 @@ from django.urls import reverse
 from edx_django_utils import monitoring as monitoring_utils
 from rest_framework import serializers
 
-from openedx.core.djangoapps.content.course_overviews.models import \
-    CourseOverview  # lint-amnesty, pylint: disable=unused-import
+from openedx.core.djangoapps.content.course_overviews.models import (
+    CourseOverview,
+)  # lint-amnesty, pylint: disable=unused-import
 from openedx.core.djangoapps.models.course_details import CourseDetails
 from openedx.core.lib.api.fields import AbsoluteURLField
 
@@ -24,7 +25,7 @@ class _MediaSerializer(serializers.Serializer):  # pylint: disable=abstract-meth
         super().__init__(*args, **kwargs)
         self.uri_attribute = uri_attribute
 
-    uri = serializers.SerializerMethodField(source='*')
+    uri = serializers.SerializerMethodField(source="*")
 
     def get_uri(self, course_overview):
         """
@@ -37,11 +38,14 @@ class _AbsolutMediaSerializer(_MediaSerializer):  # pylint: disable=abstract-met
     """
     Nested serializer to represent a media object and its absolute path.
     """
+
     requires_context = True
 
     def __call__(self, serializer_field):
         self.context = serializer_field.context
-        return super(self).__call__(serializer_field)  # lint-amnesty, pylint: disable=bad-super-call
+        return super(self).__call__(
+            serializer_field
+        )  # lint-amnesty, pylint: disable=bad-super-call
 
     uri_absolute = serializers.SerializerMethodField(source="*")
 
@@ -62,7 +66,9 @@ class _AbsolutMediaSerializer(_MediaSerializer):  # pylint: disable=abstract-met
         # In order to use the AbsoluteURLField to have the same
         # behaviour what ImageSerializer provides, we need to set
         # the request for the field
-        field._context = {"request": self.context.get("request")}  # lint-amnesty, pylint: disable=protected-access
+        field._context = {
+            "request": self.context.get("request")
+        }  # lint-amnesty, pylint: disable=protected-access
 
         return field.to_representation(cdn_applied_uri)
 
@@ -74,19 +80,23 @@ class ImageSerializer(serializers.Serializer):  # pylint: disable=abstract-metho
     The URLs will be absolute URLs with the host set to the host of the current request. If the values to be
     serialized are already absolute URLs, they will be unchanged.
     """
+
     raw = AbsoluteURLField()
     small = AbsoluteURLField()
     large = AbsoluteURLField()
 
 
-class _CourseApiMediaCollectionSerializer(serializers.Serializer):  # pylint: disable=abstract-method
+class _CourseApiMediaCollectionSerializer(
+    serializers.Serializer
+):  # pylint: disable=abstract-method
     """
     Nested serializer to represent a collection of media objects
     """
-    banner_image = _AbsolutMediaSerializer(source='*', uri_attribute='banner_image_url')
-    course_image = _MediaSerializer(source='*', uri_attribute='course_image_url')
-    course_video = _MediaSerializer(source='*', uri_attribute='course_video_url')
-    image = ImageSerializer(source='image_urls')
+
+    banner_image = _AbsolutMediaSerializer(source="*", uri_attribute="banner_image_url")
+    course_image = _MediaSerializer(source="*", uri_attribute="course_image_url")
+    course_video = _MediaSerializer(source="*", uri_attribute="course_video_url")
+    image = ImageSerializer(source="image_urls")
 
 
 class CourseSerializer(serializers.Serializer):  # pylint: disable=abstract-method
@@ -101,10 +111,10 @@ class CourseSerializer(serializers.Serializer):  # pylint: disable=abstract-meth
     enrollment_start = serializers.DateTimeField()
     enrollment_end = serializers.DateTimeField()
     id = serializers.CharField()  # pylint: disable=invalid-name
-    media = _CourseApiMediaCollectionSerializer(source='*')
-    name = serializers.CharField(source='display_name_with_default_escaped')
-    number = serializers.CharField(source='display_number_with_default')
-    org = serializers.CharField(source='display_org_with_default')
+    media = _CourseApiMediaCollectionSerializer(source="*")
+    name = serializers.CharField(source="display_name_with_default_escaped")
+    number = serializers.CharField(source="display_number_with_default")
+    org = serializers.CharField(source="display_org_with_default")
     short_description = serializers.CharField()
     start = serializers.DateTimeField()
     start_display = serializers.CharField()
@@ -113,10 +123,15 @@ class CourseSerializer(serializers.Serializer):  # pylint: disable=abstract-meth
     mobile_available = serializers.BooleanField()
     hidden = serializers.SerializerMethodField()
     invitation_only = serializers.BooleanField()
+
+    # djezzy academy
     is_by_approval = serializers.BooleanField()
+    course_type = serializers.CharField()
+    is_published = serializers.BooleanField()
+    maximum_number_learners = serializers.IntegerField()
 
     # 'course_id' is a deprecated field, please use 'id' instead.
-    course_id = serializers.CharField(source='id', read_only=True)
+    course_id = serializers.CharField(source="id", read_only=True)
 
     def get_hidden(self, course_overview):
         """
@@ -124,17 +139,21 @@ class CourseSerializer(serializers.Serializer):  # pylint: disable=abstract-meth
         Represents whether course is hidden in LMS
         """
         catalog_visibility = course_overview.catalog_visibility
-        return catalog_visibility in ['about', 'none'] or course_overview.id.deprecated  # Old Mongo should be hidden
+        return (
+            catalog_visibility in ["about", "none"] or course_overview.id.deprecated
+        )  # Old Mongo should be hidden
 
     def get_blocks_url(self, course_overview):
         """
         Get the representation for SerializerMethodField `blocks_url`
         """
-        base_url = '?'.join([
-            reverse('blocks_in_course'),
-            urllib.parse.urlencode({'course_id': course_overview.id}),
-        ])
-        return self.context['request'].build_absolute_uri(base_url)
+        base_url = "?".join(
+            [
+                reverse("blocks_in_course"),
+                urllib.parse.urlencode({"course_id": course_overview.id}),
+            ]
+        )
+        return self.context["request"].build_absolute_uri(base_url)
 
 
 class CourseDetailSerializer(CourseSerializer):  # pylint: disable=abstract-method
@@ -158,7 +177,7 @@ class CourseDetailSerializer(CourseSerializer):  # pylint: disable=abstract-meth
         # Note: This makes a call to the modulestore, unlike the other
         # fields from CourseSerializer, which get their data
         # from the CourseOverview object in SQL.
-        return CourseDetails.fetch_about_attribute(course_overview.id, 'overview')
+        return CourseDetails.fetch_about_attribute(course_overview.id, "overview")
 
 
 class CourseKeySerializer(serializers.BaseSerializer):  # pylint:disable=abstract-method
@@ -166,11 +185,11 @@ class CourseKeySerializer(serializers.BaseSerializer):  # pylint:disable=abstrac
     Serializer that takes a CourseKey and serializes it to a string course_id.
     """
 
-    @monitoring_utils.function_trace('course_key_serializer_to_representation')
+    @monitoring_utils.function_trace("course_key_serializer_to_representation")
     def to_representation(self, instance):
         # The function trace should be counting calls to this function, but I
         # couldn't find it when I looked in any of the NR transaction traces,
         # so I'm manually counting them using a custom metric:
-        monitoring_utils.increment('course_key_serializer_to_representation_call_count')
+        monitoring_utils.increment("course_key_serializer_to_representation_call_count")
 
         return str(instance)

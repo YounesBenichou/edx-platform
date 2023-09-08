@@ -28,30 +28,30 @@ mongodb_parameters = {
     "ssl": False,
     "authsource": "admin",
     "replicaSet": None,
-    
 }
 DOC_STORE_CONFIG = mongodb_parameters
 CONTENTSTORE = {
     "ENGINE": "xmodule.contentstore.mongo.MongoContentStore",
     "ADDITIONAL_OPTIONS": {},
-    "DOC_STORE_CONFIG": DOC_STORE_CONFIG
+    "DOC_STORE_CONFIG": DOC_STORE_CONFIG,
 }
 # Load module store settings from config files
 update_module_store_settings(MODULESTORE, doc_store_settings=DOC_STORE_CONFIG)
 DATA_DIR = "/openedx/data/modulestore"
 
 for store in MODULESTORE["default"]["OPTIONS"]["stores"]:
-   store["OPTIONS"]["fs_root"] = DATA_DIR
+    store["OPTIONS"]["fs_root"] = DATA_DIR
 
 # Behave like memcache when it comes to connection errors
 DJANGO_REDIS_IGNORE_EXCEPTIONS = True
 
 # Elasticsearch connection parameters
-ELASTIC_SEARCH_CONFIG = [{
-  
-  "host": "elasticsearch",
-  "port": 9200,
-}]
+ELASTIC_SEARCH_CONFIG = [
+    {
+        "host": "elasticsearch",
+        "port": 9200,
+    }
+]
 
 # Common cache config
 CACHES = {
@@ -98,17 +98,27 @@ SITE_ID = 2
 # Contact addresses
 CONTACT_MAILING_ADDRESS = "My Open edX - http://local.overhang.io"
 DEFAULT_FROM_EMAIL = ENV_TOKENS.get("DEFAULT_FROM_EMAIL", ENV_TOKENS["CONTACT_EMAIL"])
-DEFAULT_FEEDBACK_EMAIL = ENV_TOKENS.get("DEFAULT_FEEDBACK_EMAIL", ENV_TOKENS["CONTACT_EMAIL"])
+DEFAULT_FEEDBACK_EMAIL = ENV_TOKENS.get(
+    "DEFAULT_FEEDBACK_EMAIL", ENV_TOKENS["CONTACT_EMAIL"]
+)
 SERVER_EMAIL = ENV_TOKENS.get("SERVER_EMAIL", ENV_TOKENS["CONTACT_EMAIL"])
 TECH_SUPPORT_EMAIL = ENV_TOKENS.get("TECH_SUPPORT_EMAIL", ENV_TOKENS["CONTACT_EMAIL"])
 CONTACT_EMAIL = ENV_TOKENS.get("CONTACT_EMAIL", ENV_TOKENS["CONTACT_EMAIL"])
 BUGS_EMAIL = ENV_TOKENS.get("BUGS_EMAIL", ENV_TOKENS["CONTACT_EMAIL"])
 UNIVERSITY_EMAIL = ENV_TOKENS.get("UNIVERSITY_EMAIL", ENV_TOKENS["CONTACT_EMAIL"])
 PRESS_EMAIL = ENV_TOKENS.get("PRESS_EMAIL", ENV_TOKENS["CONTACT_EMAIL"])
-PAYMENT_SUPPORT_EMAIL = ENV_TOKENS.get("PAYMENT_SUPPORT_EMAIL", ENV_TOKENS["CONTACT_EMAIL"])
-BULK_EMAIL_DEFAULT_FROM_EMAIL = ENV_TOKENS.get("BULK_EMAIL_DEFAULT_FROM_EMAIL", ENV_TOKENS["CONTACT_EMAIL"])
-API_ACCESS_MANAGER_EMAIL = ENV_TOKENS.get("API_ACCESS_MANAGER_EMAIL", ENV_TOKENS["CONTACT_EMAIL"])
-API_ACCESS_FROM_EMAIL = ENV_TOKENS.get("API_ACCESS_FROM_EMAIL", ENV_TOKENS["CONTACT_EMAIL"])
+PAYMENT_SUPPORT_EMAIL = ENV_TOKENS.get(
+    "PAYMENT_SUPPORT_EMAIL", ENV_TOKENS["CONTACT_EMAIL"]
+)
+BULK_EMAIL_DEFAULT_FROM_EMAIL = ENV_TOKENS.get(
+    "BULK_EMAIL_DEFAULT_FROM_EMAIL", ENV_TOKENS["CONTACT_EMAIL"]
+)
+API_ACCESS_MANAGER_EMAIL = ENV_TOKENS.get(
+    "API_ACCESS_MANAGER_EMAIL", ENV_TOKENS["CONTACT_EMAIL"]
+)
+API_ACCESS_FROM_EMAIL = ENV_TOKENS.get(
+    "API_ACCESS_FROM_EMAIL", ENV_TOKENS["CONTACT_EMAIL"]
+)
 
 # Get rid completely of coursewarehistoryextended, as we do not use the CSMH database
 INSTALLED_APPS.remove("lms.djangoapps.coursewarehistoryextended")
@@ -152,14 +162,29 @@ LOGGING["loggers"]["tracking"]["handlers"] = ["console", "local", "tracking"]
 
 import warnings
 from django.utils.deprecation import RemovedInDjango40Warning, RemovedInDjango41Warning
+
 warnings.filterwarnings("ignore", category=RemovedInDjango40Warning)
 warnings.filterwarnings("ignore", category=RemovedInDjango41Warning)
-warnings.filterwarnings("ignore", category=DeprecationWarning, module="lms.djangoapps.course_wiki.plugins.markdownedx.wiki_plugin")
-warnings.filterwarnings("ignore", category=DeprecationWarning, module="wiki.plugins.links.wiki_plugin")
+warnings.filterwarnings(
+    "ignore",
+    category=DeprecationWarning,
+    module="lms.djangoapps.course_wiki.plugins.markdownedx.wiki_plugin",
+)
+warnings.filterwarnings(
+    "ignore", category=DeprecationWarning, module="wiki.plugins.links.wiki_plugin"
+)
 warnings.filterwarnings("ignore", category=DeprecationWarning, module="boto.plugin")
-warnings.filterwarnings("ignore", category=DeprecationWarning, module="botocore.vendored.requests.packages.urllib3._collections")
-warnings.filterwarnings("ignore", category=DeprecationWarning, module="storages.backends.s3boto")
-warnings.filterwarnings("ignore", category=DeprecationWarning, module="openedx.core.types.admin")
+warnings.filterwarnings(
+    "ignore",
+    category=DeprecationWarning,
+    module="botocore.vendored.requests.packages.urllib3._collections",
+)
+warnings.filterwarnings(
+    "ignore", category=DeprecationWarning, module="storages.backends.s3boto"
+)
+warnings.filterwarnings(
+    "ignore", category=DeprecationWarning, module="openedx.core.types.admin"
+)
 SILENCED_SYSTEM_CHECKS = ["2_0.W001", "fields.W903"]
 
 # Email
@@ -209,7 +234,7 @@ JWT_AUTH["JWT_ISSUERS"] = [
     {
         "ISSUER": "http://local.overhang.io/oauth2",
         "AUDIENCE": "openedx",
-        "SECRET_KEY": "JmugXFgnwp9nlGqqkZLMhfi9"
+        "SECRET_KEY": "JmugXFgnwp9nlGqqkZLMhfi9",
     }
 ]
 
@@ -222,7 +247,7 @@ FEATURES["ENABLE_CORS_HEADERS"] = True
 CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_ALLOW_ALL = False
 CORS_ALLOW_INSECURE = True
-CORS_ALLOW_HEADERS = corsheaders_default_headers + ('use-jwt-cookie',)
+CORS_ALLOW_HEADERS = corsheaders_default_headers + ("use-jwt-cookie",)
 
 # Add your MFE and third-party app domains here
 CORS_ORIGIN_WHITELIST = []
@@ -230,6 +255,7 @@ CORS_ORIGIN_WHITELIST = []
 # Disable codejail support
 # explicitely configuring python is necessary to prevent unsafe calls
 import codejail.jail_code
+
 codejail.jail_code.configure("python", "nonexistingpythonbinary", user=None)
 # another configuration entry is required to override prod/dev settings
 CODE_JAIL = {
@@ -257,14 +283,13 @@ SESSION_COOKIE_NAME = "studio_session_id"
 
 MAX_ASSET_UPLOAD_FILE_SIZE_IN_MB = 100
 
-FRONTEND_LOGIN_URL = LMS_ROOT_URL + '/login'
-FRONTEND_REGISTER_URL = LMS_ROOT_URL + '/register'
+FRONTEND_LOGIN_URL = LMS_ROOT_URL + "/login"
+FRONTEND_REGISTER_URL = LMS_ROOT_URL + "/register"
 
 # Create folders if necessary
 for folder in [LOG_DIR, MEDIA_ROOT, STATIC_ROOT_BASE]:
     if not os.path.exists(folder):
         os.makedirs(folder)
-
 
 
 ######## End of common CMS settings
@@ -273,8 +298,18 @@ for folder in [LOG_DIR, MEDIA_ROOT, STATIC_ROOT_BASE]:
 WEBPACK_CONFIG_PATH = "webpack.dev.config.js"
 
 
-
-COURSE_AUTHORING_MICROFRONTEND_URL = "http://apps.local.overhang.io:2001/course-authoring"
+COURSE_AUTHORING_MICROFRONTEND_URL = (
+    "http://apps.local.overhang.io:2001/course-authoring"
+)
 CORS_ORIGIN_WHITELIST.append("http://apps.local.overhang.io:2001")
 LOGIN_REDIRECT_WHITELIST.append("apps.local.overhang.io:2001")
 CSRF_TRUSTED_ORIGINS.append("apps.local.overhang.io:2001")
+
+
+CORS_ORIGIN_WHITELIST.append("apps.local.overhang.io:3002")
+LOGIN_REDIRECT_WHITELIST.append("apps.local.overhang.io:3002")
+CSRF_TRUSTED_ORIGINS.append("apps.local.overhang.io:3002")
+
+CORS_ORIGIN_WHITELIST.append("http://apps.djezzy-academy.dz:3002")
+LOGIN_REDIRECT_WHITELIST.append("http://apps.djezzy-academy.dz:3002")
+CSRF_TRUSTED_ORIGINS.append("http://apps.djezzy-academy.dz:3002")
