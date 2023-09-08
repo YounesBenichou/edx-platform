@@ -24,7 +24,7 @@ from django.http import (
     HttpResponseBadRequest,
     HttpResponseNotFound,
 )
-from django.shortcuts import redirect
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.views.decorators.csrf import ensure_csrf_cookie
@@ -333,6 +333,7 @@ def course_handler(request, course_key_string=None):
     DELETE
         json: delete this branch from this course (leaving off /branch/draft would imply delete the course)
     """
+
     try:
         if course_key_string:
             course_key = CourseKey.from_string(course_key_string)
@@ -358,12 +359,15 @@ def course_handler(request, course_key_string=None):
                 request.method == "POST"
             ):  # not sure if this is only post. If one will have ids, it goes after access
                 # djezzy academy : updating additional fields
-
                 result = additional_fields_treatment(request)
 
                 return result
-
-                return _create_or_rerun_course(request)
+            elif request.method == "DELETE":
+                print("inside delete ", course_key_string)
+                delete_course(request, course_key_string)
+                return HttpResponse(
+                    "course deleted successfully", content_type="text/plain"
+                )
 
             elif not has_studio_write_access(
                 request.user, CourseKey.from_string(course_key_string)
@@ -371,8 +375,7 @@ def course_handler(request, course_key_string=None):
                 raise PermissionDenied()
             elif request.method == "PUT":
                 raise NotImplementedError()
-            elif request.method == "DELETE":
-                raise NotImplementedError()
+
             else:
                 return HttpResponseBadRequest()
         elif request.method == "GET":  # assume html
@@ -388,30 +391,37 @@ def course_handler(request, course_key_string=None):
 
 # djezzy-academy
 def additional_fields_treatment(request):
+    result = _create_or_rerun_course(request)
+    result_json = json.loads(result.content.decode("utf-8"))
+    course_key = result_json["course_key"]
+
     try:
-        result = _create_or_rerun_course(request)
-        result_json = json.loads(result.content.decode("utf-8"))
-        course_key = result_json["course_key"]
+        this_course = CourseOverview.objects.get(id=course_key)
+    except CourseOverview.ObjectDoesNotExist:
+        return JsonResponse({"error": "Course not found"}, status=404)
+    print(request.json.get("advertised_start"))
+    advertised_start = request.json.get("advertised_start")
+    course_type = request.json.get("course_type")
+    self_paced = request.json.get("self_paced")
 
-        try:
-            this_course = CourseOverview.objects.get(id=course_key)
-        except ObjectDoesNotExist:
-            return JsonResponse({"error": "Course not found"}, status=404)
+    this_course.course_type = course_type
+    this_course.advertised_start = advertised_start
+    this_course.self_paced = self_paced
 
-        advertised_start = request.json.get("advertised_start")
-        course_type = request.json.get("course_type")
-        self_paced = request.json.get("self_paced")
+    this_course.save()
 
-        this_course.course_type = course_type
-        this_course.advertised_start = advertised_start
-        this_course.self_paced = self_paced
+    return result
 
-        this_course.save()
 
-        return result
-
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
+# djezzy-academy too for deleting
+def delete_course(request, course_key_string):
+    # djezzy-academy implemented course delete
+    print("course key string inside deletE", course_key_string)
+    course = get_object_or_404(CourseOverview, pk=course_key_string)
+    print("the deleted course_key", course)
+    course.delete()
+    # Return a success response
+    return JsonResponse({"message": "Course deleted successfully"})
 
 
 @login_required
@@ -1096,8 +1106,7 @@ def _create_or_rerun_course(request):
                     },
                     status=400,
                 )
-        # Djezzy academy next line commented is old original
-        # fields = {"start": start  }
+
         fields = {"start": start}
 
         if display_name is not None:
