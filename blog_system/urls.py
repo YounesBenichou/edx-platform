@@ -7,7 +7,9 @@ from . import views
 urlpatterns = [
     # Posts
     path("v1/posts/", views.post_list, name="post-list"),
-    path("v1/posts/<int:pk>/", views.post_detail, name="post-detail"),
+    path("v1/posts/<int:pk>/<int:user_id>/", views.post_detail, name="post-detail"),
+    path("v1/myposts/", views.my_post_list, name="my-posts-list"),
+    path("v1/posts/toggle/<int:post_id>/", views.toggle_view_post, name="toggle-post"),
     # Post Comments
     path(
         "v1/posts/<int:post_id>/comments/",
