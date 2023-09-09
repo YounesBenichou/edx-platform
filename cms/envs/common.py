@@ -2565,9 +2565,5 @@ INACTIVE_USER_URL = f"http://{CMS_BASE}"
 CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
     "http://apps.local.overhang.io:3002",
-]
-
-CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOWED_ORIGINS = [
     "http://apps.djezzy-academy.dz:3002",
 ]
