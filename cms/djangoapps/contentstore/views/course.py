@@ -363,18 +363,16 @@ def course_handler(request, course_key_string=None):
 
                 return result
             elif request.method == "DELETE":
-                print("inside delete ", course_key_string)
                 delete_course(request, course_key_string)
                 return HttpResponse(
                     "course deleted successfully", content_type="text/plain"
                 )
-
+            elif request.method == "PATCH":
+                return update_course(request, course_key_string)
             elif not has_studio_write_access(
                 request.user, CourseKey.from_string(course_key_string)
             ):
                 raise PermissionDenied()
-            elif request.method == "PUT":
-                raise NotImplementedError()
 
             else:
                 return HttpResponseBadRequest()
@@ -390,6 +388,8 @@ def course_handler(request, course_key_string=None):
 
 
 # djezzy-academy
+
+
 def additional_fields_treatment(request):
     result = _create_or_rerun_course(request)
     result_json = json.loads(result.content.decode("utf-8"))
@@ -397,9 +397,8 @@ def additional_fields_treatment(request):
 
     try:
         this_course = CourseOverview.objects.get(id=course_key)
-    except CourseOverview.ObjectDoesNotExist:
+    except CourseOverview.DoesNotExist:
         return JsonResponse({"error": "Course not found"}, status=404)
-    print(request.json.get("advertised_start"))
     advertised_start = request.json.get("advertised_start")
     course_type = request.json.get("course_type")
     self_paced = request.json.get("self_paced")
@@ -411,6 +410,30 @@ def additional_fields_treatment(request):
     this_course.save()
 
     return result
+
+
+# djezzy-academy
+def update_course(request, course_key_string):
+    if request.method == "PATCH":
+        try:
+            this_course = get_object_or_404(CourseOverview, pk=course_key_string)
+        except CourseOverview.DoesNotExist:
+            return JsonResponse({"error": "Course not found"}, status=404)
+
+        request_body = json.loads(request.body.decode("utf-8"))
+        advertised_start = request_body.get("advertised_start")
+        course_type = request_body.get("course_type")
+        self_paced = request_body.get("self_paced")
+        short_description = request_body.get("short_description")
+
+        this_course.course_type = course_type
+        this_course.advertised_start = advertised_start
+        this_course.self_paced = self_paced
+        this_course.short_description = short_description
+
+        this_course.save()
+
+        return HttpResponse("Course updated", content_type="text/plain")
 
 
 # djezzy-academy too for deleting
