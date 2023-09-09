@@ -74,6 +74,8 @@ urlpatterns = [
     ),
     # leaderboard data
     path("v1/leaderboard/", views.get_leaderboard, name="leaderboard"),
+    path("v1/leaderboard/<int:user_id>/", views.get_leaderboard_user, name="leaderboard of user"),
+
     # user_page_data
     path(
         "v1/user_page/<int:user_id>/", views.get_user_page_data, name="user-page-data"

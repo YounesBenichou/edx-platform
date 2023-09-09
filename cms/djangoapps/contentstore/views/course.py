@@ -284,6 +284,7 @@ def course_handler(request, course_key_string=None):
                     course_module = get_course_and_check_access(course_key, request.user, depth=None)
                     return JsonResponse(_course_outline_json(request, course_module))
             elif request.method == 'POST':  # not sure if this is only post. If one will have ids, it goes after access
+                
                 return _create_or_rerun_course(request)
             elif not has_studio_write_access(request.user, CourseKey.from_string(course_key_string)):
                 raise PermissionDenied()

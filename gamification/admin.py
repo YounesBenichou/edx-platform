@@ -8,9 +8,9 @@ admin.site.register(models.Gamification)
 admin.site.register(models.UserGamification)
 admin.site.register(models.Badge)
 admin.site.register(models.UserBadge)
-# admin.site.register(models.Award)
-# admin.site.register(models.UserAward)
-#
+admin.site.register(models.Award)
+admin.site.register(models.UserAward)
+
 # # badge register
 # admin.register(models.Badge)
 # class BadgeAdmin(admin.ModelAdmin):
