@@ -2562,9 +2562,7 @@ INACTIVE_USER_LOGIN = True
 # Redirect URL for inactive user. If not set, user will be redirected to /login after the login itself (loop)
 INACTIVE_USER_URL = f"http://{CMS_BASE}"
 
-
-# cms/envs/common.py  djezzy academy
 CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
-    "http://apps.djezzy-academy.dz:3002",
+    "http://apps.local.overhang.io:3002",
 ]

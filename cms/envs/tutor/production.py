@@ -265,6 +265,7 @@ ALLOWED_HOSTS = [
     "cms",
 ]
 CORS_ORIGIN_WHITELIST.append("http://studio.local.overhang.io")
+# CORS_ORIGIN_WHITELIST.append("http://apps.local.overhang.io:3002/gamification/")
 
 # Authentication
 SOCIAL_AUTH_EDX_OAUTH2_KEY = "cms-sso"

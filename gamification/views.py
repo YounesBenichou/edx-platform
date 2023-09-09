@@ -281,8 +281,7 @@ def update_score(request, user_id, type):
         return Response({"message": "UserGamification not found for user "}, status=404)
     except Gamification.DoesNotExist:
         return Response({"message": "Gamification not found"}, status=404)
-
-    return Response({"message": "Type 'unit' not found"}, status=400)
+    # return Response({"message": "Type 'unit' not found"}, status=400)
 
 
 # Awards
@@ -336,10 +335,18 @@ def user_award_list(request):
 
 @api_view(["GET"])
 def get_user_award(request, user_id):
-    user_awards = UserAward.objects.filter(user_id=user_id).values_list(
-        "award_id", flat=True
-    )
-    return Response(list(user_awards))
+    user_awards = UserAward.objects.filter(user_id=user_id)
+    serializer = UserAwardSerializer(user_awards, many=True)
+    
+    user_awards_id = [item['award_id']['id'] for item in serializer.data]
+    awards = Award.objects.all().exclude(id__in=user_awards_id)
+    # awards = Award.objects.all()
+    serializer_awards = AwardSerializer(awards, many=True)
+    results = {
+        "my_awards": serializer.data,
+        "all_awards": serializer_awards.data
+    }
+    return Response(results)
 
 
 @api_view(["POST"])
@@ -376,10 +383,17 @@ def handle_award(request, user_id, award_id):
 
     # Check if the user's score is sufficient for the award rule
     user_gamification = get_object_or_404(UserGamification, user_id=user_id)
-    if user_gamification.score >= award.rule:
+    if user_gamification.score < award.rule:
+        return Response(
+            {
+                "message": "insuficient"
+            },
+            status=status.HTTP_200_OK,
+        )
+    else:
         # Deduct points from the user's score based on the award rule
         user_gamification.score -= award.rule
-        user_gamification.save()
+        modify_score_user(user_gamification.user_id, user_gamification.score )
 
         # Create a UserAward record for the user
         user_award = UserAward.objects.create(user_id=user, award_id=award)
@@ -391,12 +405,8 @@ def handle_award(request, user_id, award_id):
             },
             status=status.HTTP_201_CREATED,
         )
-    else:
-        # Return a response indicating insufficient score
-        return Response(
-            {"message": "Insufficient score to receive this award."},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
+    # Return a response indicating insufficient score
+        
 
 
 # spinning wheel
@@ -475,6 +485,44 @@ def get_leaderboard(request):
     # serializer = LeaderboardSerializer(leaderboard_data, many=True)
     return Response(leaderboard_data)
 
+
+def find_previous_numbers_with_zero(X):
+    # Find the previous number with a zero at the end
+    previous_number = X - (X % 10)
+    return previous_number
+
+@api_view(["GET"])
+def get_leaderboard_user(request,user_id):
+    users = UserGamification.objects.all().order_by('-score')
+    users_list = list(users)
+    index = None
+    if users_list:
+        for i, user in enumerate(users):
+            print(user.user_id)
+            if user.user_id.id == user_id:
+                index = i
+                break
+    previous_rank = find_previous_numbers_with_zero(index)
+    next_rank = previous_rank + 5
+    leaderboard_data = []
+
+    for i in range(previous_rank,next_rank):
+        if i >= len(users_list):
+            break
+        user_id = users[i].user_id.id
+        badges = get_user_badges_leaderboard(user_id)
+        user_data = {
+            "user_id": users[i].user_id.id,
+            "username": users[i].user_id.username,  # Fetch the username from the User model
+            "score": users[i].score,
+            "rank": i + 1,
+            "badge": badges,
+        }
+        leaderboard_data.append(user_data)
+
+    leaderboard_data = sorted(leaderboard_data, key=lambda x: x["score"], reverse=True)
+    # serializer = LeaderboardSerializer(leaderboard_data, many=True)
+    return Response(leaderboard_data)
 
 # userpage
 

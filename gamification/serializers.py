@@ -61,6 +61,7 @@ class AwardSerializer(serializers.ModelSerializer):
 
 
 class UserAwardSerializer(serializers.ModelSerializer):
+    award_id = AwardSerializer()
     class Meta:
         model = UserAward
         fields = "__all__"
