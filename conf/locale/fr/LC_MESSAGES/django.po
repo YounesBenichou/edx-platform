@@ -18905,6 +18905,10 @@ msgstr ""
 msgid "Discover New"
 msgstr "Explorer les cours"
 
+#: lms/templates/header/navbar-authenticated.html
+msgid "Blog"
+msgstr "Articles"
+
 #: lms/templates/header/navbar-logo-header.html
 msgid "{name} Dashboard"
 msgstr "Tableau de bord {name}"

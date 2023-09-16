@@ -6,7 +6,7 @@ User = get_user_model()
 # Create your models here.
 
 
-class Post(models.Model):
+class Post(models.Model): 
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     summary = models.CharField(max_length=255, null=True, blank=True)
@@ -14,7 +14,7 @@ class Post(models.Model):
     is_hidden = models.BooleanField(default=False)
     created = models.DateField(auto_now_add=True)
     modified = models.DateField(auto_now=True)
-    content = models.TextField(max_length=255)
+    content = models.TextField(default="")
     number_of_views = models.IntegerField(default=0)
     cover_photo = models.ImageField(upload_to="post_covers/", null=True, blank=True)
 

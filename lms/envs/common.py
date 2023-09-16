@@ -5065,3 +5065,17 @@ URLS_2U_LOBS = {
     "bachelors_degree": "https://www.edx.org/bachelors",
     "boot_camps": "https://www.edx.org/boot-camps",
 }
+
+
+
+# Djezzy Academy
+GAMIFICATION_MICROFRONTEND_URL = "http://apps.local.overhang.io:3002/gamification/"
+ADMIN_MICROFRONTEND_URL = "http://apps.local.overhang.io:3000/admin/"
+BLOG_MICROFRONTEND_URL = "http://apps.local.overhang.io:3001/blog/"
+EXPLORE_COURSES_MICROFRONTEND_URL = "http://apps.local.overhang.io:3003/explore-courses/"
+
+
+# # gamification MFE
+# CORS_ORIGIN_WHITELIST.append("http://apps.local.overhang.io:3002")
+# LOGIN_REDIRECT_WHITELIST.append("apps.local.overhang.io:3002")
+# CSRF_TRUSTED_ORIGINS.append("apps.local.overhang.io:3002")

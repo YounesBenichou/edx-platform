@@ -10,46 +10,46 @@ from .models import User
 
 ####
 from .models import Post, LikePost, PostComment
-from .serializers import PostSerializer, PostCommentSerializer, LikePostSerializer
+from .serializers import PostSerializer, PostCommentSerializer, PutSerializerWithoutImage, PutSerializer, LikePostSerializer
 
 
-@api_view(["GET", "POST"])  # this gets a list of  posts or gets one post
+@api_view(["POST"])  # this gets a list of  posts or gets one post
 def post_list(request):
-    if request.method == "GET":
+    if request.method == "POST":
         paginator = PageNumberPagination()
         paginator.page_size = 9
-        print("request : ", request)
-        page = paginator.paginate_queryset(Post.objects.all(), request)
+        filterPost = request.data.get('filterPost')
+        if request.data.get('filterPost') is "" :
+            page = paginator.paginate_queryset(Post.objects.filter(is_published=True), request)
+        else :
+            page = paginator.paginate_queryset(Post.objects.filter(title__icontains=filterPost,is_published=True), request)
         serializer = PostSerializer(page, many=True)
-
-        return paginator.get_paginated_response(serializer.data)
-
-    elif request.method == "POST":
-        serializer = PostSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+        response_data = {
+        'num_pages': paginator.page.paginator.num_pages,
+        'results': serializer.data,
+        }
+        result = paginator.get_paginated_response(response_data)
+        return result
 
 @api_view(["GET"])
-def my_post_list(request):
+def my_post_list(request,user_id):
     if request.method == "GET":
-        user_id = request.GET.get("user_id")  # Get the user_id from query parameters
-        print("user________________id", user_id)
-        queryset = Post.objects.all()
-
-        if user_id is not None:
-            queryset = queryset.filter(user_id=user_id)  # Filter by user_id if provided
-
-        paginator = PageNumberPagination()
-        paginator.page_size = 4
-        print("request : ", request)
-
-        page = paginator.paginate_queryset(queryset, request)
-        serializer = PostSerializer(page, many=True)
-
-        return paginator.get_paginated_response(serializer.data)
+        my_posts = Post.objects.filter(user_id=user_id)
+        serializer = PostSerializer(my_posts, many=True)
+        # new_my_posts = []
+        # for post in serializer.data:  
+        #     likes = LikePost.objects.filter(post_id=post['id'])
+        #     post['number_of_likes'] = len(likes)
+        #     new_my_posts.append(post)
+        return Response(serializer.data,status=200)
+        
+@api_view(["POST"])
+def post_create(request):
+    serializer = PostSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data,status=201)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["GET", "PUT", "DELETE"])
@@ -66,17 +66,36 @@ def post_detail(request, pk, user_id):
         serializer = PostSerializer(post)
         return Response(serializer.data)
 
-    elif request.method == "PUT":
-        serializer = PostSerializer(post, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    elif request.method == "DELETE":
+        post.delete()
+        return Response({"message": "Post deleted"})
 
     elif request.method == "DELETE":
         post.delete()
         return Response({"message": "Post deleted"})
 
+@api_view(["PUT", "PATCH"])
+def post_modify(request, pk=None):
+    if request.method == "PUT":
+        post = Post.objects.get(id=pk)
+        serializer = PutSerializerWithoutImage(post,data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+        cover_photo = request.data.get('cover_photo')
+        if '/media/post_covers/' not in cover_photo:
+            post.cover_photo = cover_photo
+            post.save()
+            return Response(status=200)
+            
+        print(serializer.is_valid())
+        errors = serializer.errors
+        for field, field_errors in errors.items():
+            print(f"Field '{field}': {', '.join(field_errors)}")
+        return Response(status=200)
+        # if serializer.is_valid():
+        #     serializer.save()
+        #     return Response(serializer.data)
+        # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(["GET"])
 def post_comment_list(request, post_id):

@@ -8,7 +8,16 @@ class PostSerializer(serializers.ModelSerializer):
         model = Post
         fields = "__all__"
 
+class PutSerializerWithoutImage(serializers.ModelSerializer):
+    class Meta:
+        model = Post
+        exclude = ('cover_photo', )
 
+        
+class PutSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Post
+        fields = "__all__"
 # PostComment serializer
 class PostCommentSerializer(serializers.ModelSerializer):
     class Meta:

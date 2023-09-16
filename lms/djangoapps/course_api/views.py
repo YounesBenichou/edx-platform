@@ -324,14 +324,24 @@ class CourseListView(DeveloperErrorViewMixin, ListAPIView):
         """
         Yield courses visible to the user.
         """
+        
         form = CourseListGetForm(self.request.query_params, initial={'requesting_user': self.request.user})
+        print("self.request.query_params['admin']", self.request.query_params['admin'])
+        if self.request.query_params['admin'] == "true":
+            filter = {}
+        else :
+            filter = {
+                'is_published' : True,
+                'display_name__icontains': self.request.query_params['filterCourse'],
+            }
         if not form.is_valid():
             raise ValidationError(form.errors)
         return list_courses(
             self.request,
             form.cleaned_data['username'],
             org=form.cleaned_data['org'],
-            filter_=form.cleaned_data['filter_'],
+            # Djezzy Academy
+            filter_= filter,
             search_term=form.cleaned_data['search_term'],
             permissions=form.cleaned_data['permissions']
         )

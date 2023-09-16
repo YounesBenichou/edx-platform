@@ -7,8 +7,11 @@ from . import views
 urlpatterns = [
     # Posts
     path("v1/posts/", views.post_list, name="post-list"),
+    path("v1/posts/create/", views.post_create, name="post-create"),
+    path("v1/posts/delete/<int:pk>/", views.post_detail, name="post-create"),
+    path("v1/posts/modify/<int:pk>/", views.post_modify, name="post-modify"),
     path("v1/posts/<int:pk>/<int:user_id>/", views.post_detail, name="post-detail"),
-    path("v1/myposts/", views.my_post_list, name="my-posts-list"),
+    path("v1/myposts/<int:user_id>/", views.my_post_list, name="my-posts-list"),
     path("v1/posts/toggle/<int:post_id>/", views.toggle_view_post, name="toggle-post"),
     # Post Comments
     path(

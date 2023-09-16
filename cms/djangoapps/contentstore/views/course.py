@@ -393,19 +393,31 @@ def course_handler(request, course_key_string=None):
 def additional_fields_treatment(request):
     result = _create_or_rerun_course(request)
     result_json = json.loads(result.content.decode("utf-8"))
-    course_key = result_json["course_key"]
+    try:
+        course_key = result_json["course_key"]
+    except KeyError:
+        return result
 
     try:
         this_course = CourseOverview.objects.get(id=course_key)
     except CourseOverview.DoesNotExist:
         return JsonResponse({"error": "Course not found"}, status=404)
-    advertised_start = request.json.get("advertised_start")
     course_type = request.json.get("course_type")
     self_paced = request.json.get("self_paced")
-
+    is_by_approval = request.json.get("is_by_approval")
+    invitation_only = request.json.get("invitation_only")
+    display_name = request.json.get("display_name")
+    is_published = request.json.get("is_published")
+    short_description = request.json.get("short_description")
+    
     this_course.course_type = course_type
-    this_course.advertised_start = advertised_start
     this_course.self_paced = self_paced
+    this_course.display_name = display_name
+    this_course.course_type = course_type
+    this_course.invitation_only = invitation_only
+    this_course.is_by_approval = is_by_approval
+    this_course.is_published = is_published
+    this_course.short_description = short_description
 
     this_course.save()
 
@@ -421,13 +433,22 @@ def update_course(request, course_key_string):
             return JsonResponse({"error": "Course not found"}, status=404)
 
         request_body = json.loads(request.body.decode("utf-8"))
-        advertised_start = request_body.get("advertised_start")
+        # advertised_start = request_body.get("advertised_start")
         course_type = request_body.get("course_type")
         self_paced = request_body.get("self_paced")
+        is_by_approval = request_body.get("is_by_approval")
+        invitation_only = request_body.get("invitation_only")
+        display_name = request_body.get("display_name")
+        is_published = request_body.get("is_published")
         short_description = request_body.get("short_description")
-
+        
+        this_course.display_name = display_name
         this_course.course_type = course_type
-        this_course.advertised_start = advertised_start
+        this_course.invitation_only = invitation_only
+        this_course.is_by_approval = is_by_approval
+        this_course.is_published = is_published
+
+        # this_course.advertised_start = advertised_start
         this_course.self_paced = self_paced
         this_course.short_description = short_description
 
@@ -440,6 +461,7 @@ def update_course(request, course_key_string):
 def delete_course(request, course_key_string):
     # djezzy-academy implemented course delete
     print("course key string inside deletE", course_key_string)
+    
     course = get_object_or_404(CourseOverview, pk=course_key_string)
     print("the deleted course_key", course)
     course.delete()

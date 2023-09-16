@@ -306,10 +306,6 @@ LOGIN_REDIRECT_WHITELIST.append("apps.local.overhang.io:2001")
 CSRF_TRUSTED_ORIGINS.append("apps.local.overhang.io:2001")
 
 
-CORS_ORIGIN_WHITELIST.append("apps.local.overhang.io:3002")
-LOGIN_REDIRECT_WHITELIST.append("apps.local.overhang.io:3002")
-CSRF_TRUSTED_ORIGINS.append("apps.local.overhang.io:3002")
-
-CORS_ORIGIN_WHITELIST.append("http://apps.djezzy-academy.dz:3002")
-LOGIN_REDIRECT_WHITELIST.append("http://apps.djezzy-academy.dz:3002")
-CSRF_TRUSTED_ORIGINS.append("http://apps.djezzy-academy.dz:3002")
+# CORS_ORIGIN_WHITELIST.append("http://apps.djezzy-academy.dz:3002")
+# LOGIN_REDIRECT_WHITELIST.append("http://apps.djezzy-academy.dz:3002")
+# CSRF_TRUSTED_ORIGINS.append("http://apps.djezzy-academy.dz:3002")
