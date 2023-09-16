@@ -2,6 +2,9 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from django.core.files.images import ImageFile
+from django.utils import timezone
+from datetime import timedelta
+import json
 
 
 from .models import User
@@ -529,13 +532,18 @@ def get_leaderboard_user(request,user_id):
 
 @api_view(["GET"])
 def get_user_page_data(request, user_id):
+    print('heyyyyyy')
     try:
-        # Get user's gamification data
         score = UserGamification.objects.get(user_id=user_id)
-        serializer_score = UserGamificationSerializerGet(score, many=False).data
     except UserGamification.DoesNotExist:
-        serializer_score = None
-
+        current_datetime = timezone.now()
+        yesterday_datetime = current_datetime - timedelta(days=1)
+        user = get_object_or_404(User, pk=user_id)
+        score = UserGamification.objects.create(user_id=user,last_time_played_spinningwheel=yesterday_datetime)
+        score.save()
+    score = UserGamification.objects.get(user_id=user_id)
+    serializer_score = UserGamificationSerializerGet(score, many=False)
+    print('serializer_score',serializer_score.data)
     # Get the last created badge for the user
     last_created_badge = (
         UserBadge.objects.filter(user_id=user_id).order_by("-created").first()
@@ -567,7 +575,7 @@ def get_user_page_data(request, user_id):
     user_awards_list = list(awards)
 
     user_data = {
-        "user_score": serializer_score,
+        "user_score": serializer_score.data,
         "last_created_badge": last_created_badge_data,
         "last_time_played_spinningwheel": serializer_last_time_played,
         "user_awards": user_awards_list,
