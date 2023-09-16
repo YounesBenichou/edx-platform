@@ -532,7 +532,6 @@ def get_leaderboard_user(request,user_id):
 
 @api_view(["GET"])
 def get_user_page_data(request, user_id):
-    print('heyyyyyy')
     try:
         score = UserGamification.objects.get(user_id=user_id)
     except UserGamification.DoesNotExist:
@@ -543,7 +542,6 @@ def get_user_page_data(request, user_id):
         score.save()
     score = UserGamification.objects.get(user_id=user_id)
     serializer_score = UserGamificationSerializerGet(score, many=False)
-    print('serializer_score',serializer_score.data)
     # Get the last created badge for the user
     last_created_badge = (
         UserBadge.objects.filter(user_id=user_id).order_by("-created").first()
